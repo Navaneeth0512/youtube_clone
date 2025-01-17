@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "945800688878",
+    "project_id": "clone-e8eb7",
+    "storage_bucket": "clone-e8eb7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:945800688878:android:5e4b1750089d0b77c72fff",
+        "android_client_info": {
+          "package_name": "com.example.youtube_clone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDj2YMTbShJu-MnKZY5eTFduYqyXG_1uFg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
