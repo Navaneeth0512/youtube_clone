@@ -19,6 +19,18 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isPaginating = false;
   int _currentIndex = 0;
 
+  String _searchQuery = '';
+  bool _isSearching = false;
+
+  final List<String> _categories = [
+    "All",
+    "News",
+    "Music",
+    "Gaming",
+    "Tech",
+  ];
+  String _selectedCategory = "All";
+
   @override
   void initState() {
     super.initState();
@@ -119,6 +131,19 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _startSearch() {
+    setState(() {
+      _isSearching = true;
+    });
+  }
+
+  void _stopSearch() {
+    setState(() {
+      _searchQuery = '';
+      _isSearching = false;
+    });
+  }
+
   Widget _buildVideoCard(Map<String, dynamic> video) {
     return GestureDetector(
       onTap: () {
@@ -148,12 +173,35 @@ class _HomeScreenState extends State<HomeScreen> {
                 fit: BoxFit.cover,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                video['title'],
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    video['title'],
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert),
+                    onSelected: (value) {
+                      // Handle menu item selection
+                    },
+                    itemBuilder 
+: (BuildContext context) {
+                      return {'Save', 'Watch Later', 'Not Intrested'}.map((String choice) {
+                        return PopupMenuItem<String>(
+                          value: choice,
+                          child: Text(choice),
+                        );
+                      }).toList();
+                    },
+                  ),
+                ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -168,6 +216,39 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildCategories() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: _categories.map((category) {
+          final isSelected = _selectedCategory == category;
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _selectedCategory = category;
+              });
+            },
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.black : Colors.grey[200],
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              child: Text(
+                category,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> _screens = [
@@ -175,28 +256,86 @@ class _HomeScreenState extends State<HomeScreen> {
           ? const ShimmerLoader()
           : RefreshIndicator(
               onRefresh: _fetchVideos,
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: _videoData.length + (_isPaginating ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == _videoData.length) {
-                    return const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-                  return _buildVideoCard(_videoData[index]);
-                },
+              child: Column(
+                children: [
+                  _buildCategories(),
+                  Expanded(
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: _videoData.length + (_isPaginating ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == _videoData.length) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                        final video = _videoData[index];
+                        if (_isSearching &&
+                            !video['title']
+                                .toString()
+                                .toLowerCase()
+                                .contains(_searchQuery.toLowerCase())) {
+                          return const SizedBox();
+                        }
+                        return _buildVideoCard(video);
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
       const ProfileScreen(),
-       DownloadScreen(),
+      DownloadScreen(),
     ];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('YouTube Clone'),
-        backgroundColor: Colors.red,
+        title: _isSearching
+            ? TextField(
+                autofocus: true,
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+                decoration: const InputDecoration(
+                  hintText: 'Search...',
+                  border: InputBorder.none,
+                  hintStyle: TextStyle(color: Colors.grey),
+                ),
+              )
+            : Row(
+                children: [
+                  Image.asset(
+                    'assets/logo.png', // Replace with the correct path to your logo image
+                    height: 38,        // Adjust the height to fit your AppBar
+                  ),
+                  const SizedBox(width: 8), // Add spacing between the logo and text
+                  Text(
+                    'YouTube',
+                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+        backgroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {
+              // Handle notification icon press
+            },
+          ),
+          _isSearching
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: _stopSearch,
+                )
+              : IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: _startSearch,
+                ),
+        ],
       ),
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(

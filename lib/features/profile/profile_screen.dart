@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:youtube_clone/features/theme/theme_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -14,58 +13,14 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late User? _user;
-  String? _username;
-  String? _email;
-  bool _isLoading = true;
+  String _username = "Johnny "; // Hardcoded demo username
+  String _email = "johnny@example.com"; // Hardcoded demo email
+  bool _isLoading = false; // Set to false since we're using demo data
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Any code that depends on inherited widgets can be placed here
-  }
-
-  Future<void> _loadUserData() async {
-    _user = _auth.currentUser;
-
-    if (_user != null) {
-      try {
-        final doc = await FirebaseFirestore.instance.collection('users').doc(_user!.uid).get();
-
-        // Ensure widget is still mounted before calling setState
-        if (!mounted) return;
-
-        if (doc.exists) {
-          setState(() {
-            _username = doc['username'] ?? 'Guest';
-            _email = doc['email'] ?? 'No email provided';
-            _isLoading = false;
-          });
-        } else {
-          throw Exception('User data not found.');
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to load user data: $e")),
-          );
-        }
-      }
-    } else {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
+    _user = _auth.currentUser ; // Get the current user
   }
 
   Future<void> _logout() async {
@@ -110,15 +65,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         const CircleAvatar(
                           radius: 40,
-                          backgroundColor: Colors.grey,
-                          child: Icon(Icons.person, size: 40, color: Colors.white),
+                          backgroundImage: NetworkImage('https://robohash.org/hello'), // Placeholder avatar
+                          // You can replace the URL with any image URL you want
                         ),
                         const SizedBox(width: 16),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _username ?? 'Loading...',
+                              _username,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -126,7 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              _email ?? 'Loading...',
+                              _email,
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey,
