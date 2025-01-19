@@ -16,26 +16,29 @@ class _DownloadScreenState extends State<DownloadScreen> {
   @override
   void initState() {
     super.initState();
-    _refreshDownloads();
+    _refreshDownloads();  // Initialize and refresh the list of downloaded videos
   }
 
+  // Refresh the list of downloaded videos
   void _refreshDownloads() {
     setState(() {
       _downloadedVideos = _downloadManager.getDownloadedVideos();
     });
   }
 
+  // Play the selected video
   void _playVideo(File videoFile) async {
     try {
-      final decryptedData = await EncryptionHelper.decryptFile(videoFile);
+      final decryptedData = await EncryptionHelper.decryptFile(videoFile);  // Decrypt the video
       final tempDir = await _downloadManager.getDownloadPath();
       final tempFile = File("$tempDir/temp.mp4");
-      await tempFile.writeAsBytes(decryptedData);
+
+      await tempFile.writeAsBytes(decryptedData);  // Write the decrypted video to a temp file
 
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => VideoPlayerScreen(videoFile: tempFile, videoData: {},),
+          builder: (context) => VideoPlayerScreen(videoFile: tempFile, videoData: {}),
         ),
       );
     } catch (e) {
@@ -59,21 +62,23 @@ class _DownloadScreenState extends State<DownloadScreen> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text("No downloads found."));
           }
-          final videos = snapshot.data!;
+
+          final videos = snapshot.data!;  // Get the list of downloaded videos
+
           return ListView.builder(
             itemCount: videos.length,
             itemBuilder: (context, index) {
               final video = videos[index];
               return ListTile(
-                title: Text(video.path.split('/').last),
+                title: Text(video.path.split('/').last),  // Show the video file name
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () async {
-                    await _downloadManager.deleteVideo(video.path);
-                    _refreshDownloads();
+                    await _downloadManager.deleteVideo(video.path);  // Delete the selected video
+                    _refreshDownloads();  // Refresh the download list after deletion
                   },
                 ),
-                onTap: () => _playVideo(video),
+                onTap: () => _playVideo(video),  // Play the selected video
               );
             },
           );

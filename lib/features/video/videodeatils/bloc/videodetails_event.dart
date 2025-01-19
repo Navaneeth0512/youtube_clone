@@ -1,17 +1,12 @@
+
 import 'package:equatable/equatable.dart';
 
 abstract class VideoDetailsEvent extends Equatable {
   const VideoDetailsEvent();
 
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
-
-class ToggleLike extends VideoDetailsEvent {}
-
-class ShareVideo extends VideoDetailsEvent {}
-
-class DownloadVideo extends VideoDetailsEvent {}
 
 class InitializeVideoPlayer extends VideoDetailsEvent {
   final String videoUrl;
@@ -19,7 +14,20 @@ class InitializeVideoPlayer extends VideoDetailsEvent {
   const InitializeVideoPlayer(this.videoUrl);
 
   @override
-  List<Object?> get props => [videoUrl];
+  List<Object> get props => [videoUrl];
+}
+
+class ToggleLike extends VideoDetailsEvent {}
+
+class ShareVideo extends VideoDetailsEvent {}
+
+class DownloadVideo extends VideoDetailsEvent {
+  final String videoUrl;  // Define the videoUrl parameter
+
+  const DownloadVideo({required this.videoUrl});
+
+  @override
+  List<Object> get props => [videoUrl];
 }
 
 class PlayPauseVideo extends VideoDetailsEvent {}

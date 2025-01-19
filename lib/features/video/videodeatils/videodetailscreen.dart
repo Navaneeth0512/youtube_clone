@@ -68,7 +68,7 @@ class VideoDetailsScreen extends StatelessWidget {
                               icon: const Icon(Icons.download),
                               onPressed: state.isDownloading
                                   ? null
-                                  : () => bloc.add(DownloadVideo()),
+                                  : () => bloc.add(DownloadVideo(videoUrl: video['videoUrl'])),
                             ),
                           ],
                         ),

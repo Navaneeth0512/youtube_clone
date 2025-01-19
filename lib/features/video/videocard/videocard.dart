@@ -16,10 +16,8 @@ class VideoCard extends StatelessWidget {
         // Ensure VideoBloc is available in the widget tree
         final videoBloc = context.read<VideoBloc>();
 
-        if (videoBloc != null) {
-          videoBloc.add(SelectVideo(video: video));
-        }
-
+        videoBloc.add(SelectVideo(video: video));
+      
         // Navigate to VideoDetailsScreen
         Navigator.push(
           context,

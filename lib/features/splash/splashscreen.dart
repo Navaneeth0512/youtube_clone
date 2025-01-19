@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -61,20 +62,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.play_circle_fill,
-                size: 100,
-                color: Colors.red,
+              Lottie.asset(
+                'assets/splash_animation.json',
+                width: 300,
+                height: 300,
               ),
               const SizedBox(height: 20),
-              const Text(
-                'YouTube Clone',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red,
-                ),
-              ),
             ],
           ),
         ),
