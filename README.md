@@ -40,3 +40,7 @@ dependencys used:
 
 used just basic auth for signup and used a password reset mail in forgot password option
 it is just a basic application with limited number of features
+
+if login with phone number doesnt generates otp try this number and otp "+919207675299"  and "000000"
+if the video is not loading please wait a while 
+if is there anything to change please let me know
