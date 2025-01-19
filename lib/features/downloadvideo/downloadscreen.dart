@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:youtube_clone/features/video/video_player_screen.dart';
-import 'package:youtube_clone/utile/downloadmanager.dart';
+import 'package:youtube_clone/features/downloadvideo/downloadmanager.dart';
+import 'package:youtube_clone/features/video/Videoplayscreen/video_player_screen.dart';
 import 'package:youtube_clone/utile/ebcryption.dart';
 
 class DownloadScreen extends StatefulWidget {

@@ -1,11 +1,9 @@
 import 'dart:io';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:path_provider/path_provider.dart';
 import 'package:youtube_clone/utile/ebcryption.dart';
 
 class DownloadManager {
-  final _storage = const FlutterSecureStorage();
   final _dio = dio.Dio();
   Future<String> getDownloadPath() async {
     final directory = await getApplicationDocumentsDirectory();

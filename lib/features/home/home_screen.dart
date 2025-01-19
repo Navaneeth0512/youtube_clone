@@ -1,318 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:youtube_clone/downloadscreen.dart';
-import 'package:youtube_clone/features/profile/profile_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:youtube_clone/features/downloadvideo/downloadscreen.dart';
+import 'package:youtube_clone/features/home/bloc/homescreenbloc_bloc.dart';
+import 'package:youtube_clone/features/home/bloc/homescreenbloc_event.dart';
+import 'package:youtube_clone/features/home/bloc/homescreenbloc_state.dart';
+import 'package:youtube_clone/features/video/videocard/videocard.dart';
 import 'package:youtube_clone/widgets/shimmerloader.dart';
-import 'package:youtube_clone/features/video/videocard.dart';
+import 'package:youtube_clone/features/profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<Map<String, dynamic>> _videoData = [];
-  final ScrollController _scrollController = ScrollController();
-  bool _isLoading = true;
-  bool _isPaginating = false;
-  int _currentIndex = 0;
-
-  String _searchQuery = '';
-  bool _isSearching = false;
-
-  final List<String> _categories = [
-    "All",
-    "News",
-    "Music",
-    "Gaming",
-    "Tech",
-  ];
-  String _selectedCategory = "All";
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchVideos();
-    _scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _fetchVideos() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      setState(() {
-        _videoData.addAll([
-          {
-            "thumbnail": "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-            "title": "Relaxing Sunset Views",
-            "channel": "Nature Lover",
-            "views": "2.1M views",
-            "uploaded": "3 days ago",
-            "videoUrl": "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-          },
-          {
-            "thumbnail": "https://images.unsplash.com/photo-1491553895911-0055eca6402d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-            "title": "Cityscapes Around the World",
-            "channel": "Urban Explorer",
-            "views": "4.8M views",
-            "uploaded": "1 week ago",
-            "videoUrl": "http://techslides.com/demos/sample-videos/small.mp4",
-          },
-          {
-            "thumbnail": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-            "title": "Abstract Art Timelapse",
-            "channel": "Creative Minds",
-            "views": "1.2M views",
-            "uploaded": "2 days ago",
-            "videoUrl": "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
-          },
-        ]);
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _loadMoreVideos() async {
-    if (_isPaginating) return;
-
-    setState(() {
-      _isPaginating = true;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (mounted) {
-      setState(() {
-        _videoData.addAll([
-          {
-            "thumbnail": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-            "title": "Underwater World",
-            "channel": "Ocean Explorer",
-            "views": "3.4M views",
-            "uploaded": "1 day ago",
-            "videoUrl": "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-          },
-          {
-            "thumbnail": "https://images.unsplash.com/photo-1519608487953-e999c86e7455?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-            "title": "Mountain Climbing Adventure",
-            "channel": "Climbers United",
-            "views": "1.8M views",
-            "uploaded": "2 days ago",
-            "videoUrl": "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-          },
-        ]);
-        _isPaginating = false;
-      });
-    }
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.atEdge &&
-        _scrollController.position.pixels != 0 &&
-        !_isPaginating) {
-      _loadMoreVideos();
-    }
-  }
-
-  void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
-  void _startSearch() {
-    setState(() {
-      _isSearching = true;
-    });
-  }
-
-  void _stopSearch() {
-    setState(() {
-      _searchQuery = '';
-      _isSearching = false;
-    });
-  }
-
-  Widget _buildVideoCard(Map<String, dynamic> video) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Hero(
-              tag: video['thumbnail'],
-              child: VideoCard(video: video),
-            ),
-          ),
-        );
-      },
-      child: Card(
-        margin: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Hero(
-              tag: video['thumbnail'],
-              child: CachedNetworkImage(
-                imageUrl: video['thumbnail'],
-                placeholder: (context, url) => const ShimmerLoader(),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-                height: 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    video['title'],
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_vert),
-                    onSelected: (value) {
-                      // Handle menu item selection
-                    },
-                    itemBuilder 
-: (BuildContext context) {
-                      return {'Save', 'Watch Later', 'Not Intrested'}.map((String choice) {
-                        return PopupMenuItem<String>(
-                          value: choice,
-                          child: Text(choice),
-                        );
-                      }).toList();
-                    },
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                "${video['channel']} • ${video['views']} • ${video['uploaded']}",
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategories() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: _categories.map((category) {
-          final isSelected = _selectedCategory == category;
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedCategory = category;
-              });
-            },
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.black : Colors.grey[200],
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-              child: Text(
-                category,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
+  bool _isSearching = false; // Toggle search mode
+  String _searchQuery = ""; // Store the search query
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _screens = [
-      _isLoading
-          ? const ShimmerLoader()
-          : RefreshIndicator(
-              onRefresh: _fetchVideos,
-              child: Column(
-                children: [
-                  _buildCategories(),
-                  Expanded(
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount: _videoData.length + (_isPaginating ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (index == _videoData.length) {
-                          return const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-                        final video = _videoData[index];
-                        if (_isSearching &&
-                            !video['title']
-                                .toString()
-                                .toLowerCase()
-                                .contains(_searchQuery.toLowerCase())) {
-                          return const SizedBox();
-                        }
-                        return _buildVideoCard(video);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-      const ProfileScreen(),
-      DownloadScreen(),
-    ];
+    final List<String> categories = ["All", "Music", "News", "Movies", "Gaming"];
 
     return Scaffold(
       appBar: AppBar(
         title: _isSearching
             ? TextField(
                 autofocus: true,
-                onChanged: (value) {
+                onChanged: (query) {
                   setState(() {
-                    _searchQuery = value;
+                    _searchQuery = query;
                   });
                 },
-                decoration: const InputDecoration(
-                  hintText: 'Search...',
+                decoration: InputDecoration(
+                  hintText: "Search videos...",
                   border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.grey),
+                  hintStyle: const TextStyle(color: Colors.grey),
                 ),
+                style: const TextStyle(color: Colors.black),
               )
             : Row(
                 children: [
                   Image.asset(
                     'assets/logo.png', // Replace with the correct path to your logo image
-                    height: 38,        // Adjust the height to fit your AppBar
+                    height: 38,
                   ),
-                  const SizedBox(width: 8), // Add spacing between the logo and text
-                  Text(
+                  const SizedBox(width: 8),
+                  const Text(
                     'YouTube',
                     style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                   ),
@@ -320,27 +55,213 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
         backgroundColor: Colors.white,
         actions: [
+          if (_isSearching)
+            IconButton(
+              icon: const Icon(Icons.clear),
+              onPressed: () {
+                setState(() {
+                  _isSearching = false;
+                  _searchQuery = "";
+                });
+              },
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                setState(() {
+                  _isSearching = true;
+                });
+              },
+            ),
           IconButton(
             icon: const Icon(Icons.notifications),
             onPressed: () {
               // Handle notification icon press
             },
           ),
-          _isSearching
-              ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: _stopSearch,
-                )
-              : IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: _startSearch,
-                ),
         ],
       ),
-      body: _screens[_currentIndex],
+      body: Column(
+        children: [
+          // Categories Section
+          SizedBox(
+            height: 50,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    context
+                        .read<HomeBloc>()
+                        .add(ChangeCategoryEvent(categories[index]));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Chip(
+                      label: Text(categories[index]),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          // Videos Section
+          Expanded(
+            child: BlocBuilder<HomeBloc, HomeState>(
+              builder: (context, state) {
+                if (state is HomeLoadingState) {
+                  return const ShimmerLoader();
+                } else if (state is HomeLoadedState) {
+                  final filteredVideos = _searchQuery.isEmpty
+                      ? state.videoData
+                      : state.videoData
+                          .where((video) =>
+                              video['title']
+                                  .toString()
+                                  .toLowerCase()
+                                  .contains(_searchQuery.toLowerCase()) ||
+                              video['channel']
+                                  .toString()
+                                  .toLowerCase()
+                                  .contains(_searchQuery.toLowerCase()))
+                          .toList();
+
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<HomeBloc>().add(FetchVideosEvent());
+                    },
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (scrollNotification) {
+                        if (scrollNotification is ScrollEndNotification &&
+                            scrollNotification.metrics.pixels ==
+                                scrollNotification.metrics.maxScrollExtent) {
+                          context.read<HomeBloc>().add(LoadMoreVideosEvent());
+                          return true;
+                        }
+                        return false;
+                      },
+                      child: ListView.builder(
+                        itemCount: filteredVideos.length,
+                        itemBuilder: (context, index) {
+                          final video = filteredVideos[index];
+
+                          return RepaintBoundary(
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => VideoCard(video: video),
+                                  ),
+                                );
+                              },
+                              child: Card(
+                                margin: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Hero(
+                                      tag: '${video['thumbnail']}_$index',
+                                      child: Image.network(
+                                        video['thumbnail'],
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        height: 200,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  video['title'],
+                                                  style: const TextStyle(
+                                                      fontWeight: FontWeight.bold),
+                                                ),
+                                                Text(
+                                                  "${video['channel']} • ${video['views']} • ${video['uploaded']}",
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuButton(
+                                            icon: const Icon(Icons.more_vert),
+                                            itemBuilder: (context) => [
+                                              const PopupMenuItem(
+                                                value: 'share',
+                                                child: Text('Share'),
+                                              ),
+                                              const PopupMenuItem(
+                                                value: 'save',
+                                                child: Text('Save'),
+                                              ),
+                                              const PopupMenuItem(
+                                                value: 'report',
+                                                child: Text('Report'),
+                                              ),
+                                            ],
+                                            onSelected: (value) {
+                                              // Handle menu actions
+                                              switch (value) {
+                                                case 'share':
+                                                  // Share logic here
+                                                  break;
+                                                case 'save':
+                                                  // Save logic here
+                                                  break;
+                                                case 'report':
+                                                  // Report logic here
+                                                  break;
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                } else if (state is HomeErrorState) {
+                  return Center(child: Text('Error: ${state.errorMessage}'));
+                }
+                return Container();
+              },
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped,
+        onTap: (int index) {
+          switch (index) {
+            case 1:
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
+              break;
+            case 2:
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => DownloadScreen()),
+              );
+              break;
+            default:
+              break;
+          }
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
